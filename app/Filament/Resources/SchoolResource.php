@@ -2,22 +2,26 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SchoolResource\Pages;
-use App\Filament\Resources\SchoolResource\RelationManagers;
-use App\Models\School;
 use Filament\Forms;
+use Filament\Forms\Components\Group;
+use Filament\Tables;
+use App\Models\School;
+use Filament\Forms\Form;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Wizard;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\SchoolResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\SchoolResource\RelationManagers;
 
 class SchoolResource extends Resource
 {
@@ -30,93 +34,102 @@ class SchoolResource extends Resource
         return $form
             ->schema([
 
-                Wizard::make([
-                    Wizard\Step::make('Basic Details')
-                        ->schema([
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('name')
-                                        ->placeholder('Name')
-                                        ->helperText('Name of the school')
-                                        ->required()
-                                        ->maxLength(255),
-                                ]),
-
-                            RichEditor::make('description')
-                                ->placeholder('Description')
-                                ->helperText('Description for the school')
-                                ->required(),
-
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('phone')
-                                        ->placeholder('Phone')
-                                        ->helperText('Phone number for use to contact the school')
-                                        ->required()
-                                        ->tel()
-                                        ->length(10)
-                                        ->mask('9999999999'),
-
-                                    TextInput::make('email')
-                                        ->placeholder('Email')
-                                        ->helperText('Email address for use to contact the school')
-                                        ->required()
-                                        ->maxLength(255)
-                                        ->email(),
-                                ]),
-
-                            Toggle::make('is_active')
-                                ->label('Active?')
-                                ->helperText('Whether the school should be active on the platform')
-                        ]),
-
-                    Wizard\Step::make('Address')
-                        ->schema([
-                            TextInput::make('street_address')
-                                ->label('Street Address')
-                                ->placeholder('Street Address')
-                                ->required()
-                                ->maxLength(255),
-
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('locality')
-                                        ->placeholder('Locality')
-                                        ->required()
-                                        ->maxLength(255),
-
-                                    TextInput::make('city_town_village')
-                                        ->label('City/Town/Village')
-                                        ->placeholder('City/Town/Village')
-                                        ->required()
-                                        ->maxLength(255),
-                                ]),
-
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('district')
-                                        ->placeholder('District')
-                                        ->required()
-                                        ->maxLength(255),
-
-                                    TextInput::make('state')
-                                        ->placeholder('State')
-                                        ->required()
-                                        ->maxLength(255),
-                                ]),
-                            Grid::make()
-                                ->schema([
-                                    TextInput::make('pin_code')
-                                        ->placeholder('PIN')
-                                        ->required()
-                                        ->maxLength(6)
-                                        ->numeric()
-                                        ->mask('999999'),
-                                ]),
-
-                        ])
-                ])
+                Wizard::make()
                     ->columnSpanFull()
+                    ->persistStepInQueryString()
+                    ->schema([
+                        Wizard\Step::make('Basic Details')
+                            ->schema([
+                                Grid::make()
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->placeholder('Name')
+                                            ->helperText('Name of the school')
+                                            ->required()
+                                            ->maxLength(255),
+                                    ]),
+
+                                RichEditor::make('description')
+                                    ->placeholder('Description')
+                                    ->helperText('Description for the school')
+                                    ->required()
+                                    ->columnSpanFull(),
+
+                                Grid::make()
+                                    ->schema([
+                                        TextInput::make('phone')
+                                            ->placeholder('Phone')
+                                            ->helperText('Phone number for use to contact the school')
+                                            ->required()
+                                            ->tel()
+                                            ->length(10)
+                                            ->mask('9999999999'),
+
+                                        TextInput::make('email')
+                                            ->placeholder('Email')
+                                            ->helperText('Email address for use to contact the school')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->email(),
+                                    ]),
+
+                                Toggle::make('is_active')
+                                    ->label('Active?')
+                                    ->helperText('Whether the school should be active on the platform'),
+                            ]),
+
+                        Wizard\Step::make('Address')
+                            ->schema([
+                                Group::make()
+                                    ->relationship('address')
+                                    ->schema([
+                                        TextInput::make('street_address')
+                                            ->label('Street Address')
+                                            ->placeholder('Street Address')
+                                            ->maxLength(255)
+                                            ->required(),
+
+                                        Grid::make()
+                                            ->schema(([
+                                                TextInput::make('locality')
+                                                    ->placeholder('Locality')
+                                                    ->maxLength(255)
+                                                    ->required(),
+
+                                                TextInput::make('city_town_village')
+                                                    ->label('City/Town/Village')
+                                                    ->placeholder('City/Town/Village')
+                                                    ->maxLength(255)
+                                                    ->required(),
+                                            ])),
+
+                                        Grid::make()
+                                            ->schema(([
+                                                TextInput::make('district')
+                                                    ->label('District')
+                                                    ->placeholder('District')
+                                                    ->maxLength(255)
+                                                    ->required(),
+
+                                                TextInput::make('state')
+                                                    ->label('State')
+                                                    ->placeholder('State')
+                                                    ->maxLength(255)
+                                                    ->required(),
+                                            ])),
+
+                                        Grid::make()
+                                            ->schema(([
+                                                TextInput::make('pin_code')
+                                                    ->label('PIN')
+                                                    ->placeholder('PIN')
+                                                    ->maxLength(6)
+                                                    ->required()
+                                                    ->mask('999999'),
+                                            ])),
+                                    ])
+                            ])
+                    ])
 
             ]);
     }
@@ -125,9 +138,24 @@ class SchoolResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')
+                    ->description(fn(School $school) => Str::limit(strip_tags($school->description), 64))
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('phone')
+                    ->searchable(),
+
+                TextColumn::make('email')
+                    ->searchable(),
+
+                IconColumn::make('is_active')
+                    ->label('Active?')
+
             ])
             ->filters([
+                TernaryFilter::make('is_active')
+                    ->label('Active?'),
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([

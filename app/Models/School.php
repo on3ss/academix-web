@@ -27,4 +27,9 @@ class School extends Model
     {
         return $this->morphOne(Address::class, 'addressable');
     }
+
+    public function grades()
+    {
+        return $this->belongsToMany(Grade::class);
+    }
 }

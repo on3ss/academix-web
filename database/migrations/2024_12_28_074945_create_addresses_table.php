@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('state');
             $table->string('pin_code');
             $table->morphs('addressable');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

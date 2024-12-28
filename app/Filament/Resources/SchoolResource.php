@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\SchoolResource\RelationManagers\GradesRelationManager;
 use Filament\Forms;
 use Filament\Forms\Components\Group;
 use Filament\Tables;
@@ -173,7 +174,7 @@ class SchoolResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            GradesRelationManager::class
         ];
     }
 

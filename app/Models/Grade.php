@@ -12,7 +12,11 @@ class Grade extends Model
         'is_active'
     ];
 
-    public function parent()
+    protected $casts = [
+        'is_active' => 'boolean'
+    ];
+
+    public function grade_parent()
     {
         return $this->belongsTo(GradeParent::class);
     }

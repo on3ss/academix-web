@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\School;
 use Filament\Forms;
 use Filament\Tables;
 use App\Models\Grade;
@@ -48,10 +49,11 @@ class GradeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('grade_parent.name')
+                TextColumn::make('grade_parent')
                     ->label('Parent')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(fn(Grade $grade) => isset($grade->grade_parent) ? $grade->grade_parent->name : '-'),
 
                 TextColumn::make('name')
                     ->searchable()

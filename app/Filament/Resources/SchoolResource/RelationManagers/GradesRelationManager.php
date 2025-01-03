@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SchoolResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Grade;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Forms\Components\Select;
@@ -35,7 +36,8 @@ class GradesRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('grade_parent.name')
                     ->label('Parent')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->getStateUsing(fn(Grade $grade) => $grade->grade_parent ? $grade->grade_parent->name : 'None'),
 
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
